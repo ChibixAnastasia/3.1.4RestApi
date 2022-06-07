@@ -1,7 +1,6 @@
 package ru.kata.spring.boot_security.demo.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -12,24 +11,30 @@ import ru.kata.spring.boot_security.demo.service.UserService;
 import java.security.Principal;
 
 @Controller
-@RequestMapping("/admin")
+@RequestMapping("/admin/user")
 public class AdminController {
-
 
     private final UserService userService;
     private final RoleService roleService;
-    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public AdminController(UserService userService, RoleService roleService, PasswordEncoder passwordEncoder) {
+    public AdminController(UserService userService, RoleService roleService) {
         this.userService = userService;
         this.roleService = roleService;
-        this.passwordEncoder = passwordEncoder;
     }
 
-    @GetMapping
+
+    public String page (Model model, Principal principal){
+        User user = (User) userService.loadUserByUsername(principal.getName());
+        model.addAttribute("user", user);
+        return "admin";
+    }
+
+
+
+/*    @GetMapping
     public String allUsers(Model model, Principal principal) {
-        model.addAttribute("users", userService.index());
+        model.addAttribute("users", userService.getAllUsers());
         model.addAttribute("userLogin", userService.getUserByUsername(principal.getName()));
         model.addAttribute("allRoles", roleService.findAllRoles());
         model.addAttribute("newUser", new User());
@@ -53,7 +58,7 @@ public class AdminController {
     @PostMapping("/new")
     public String createUser(@ModelAttribute("newUser") User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userService.addUser(user);
+        userService.saveUser(user);
         return "redirect:/admin";
-    }
+    }*/
 }

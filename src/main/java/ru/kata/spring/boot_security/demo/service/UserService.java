@@ -1,45 +1,21 @@
 package ru.kata.spring.boot_security.demo.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import ru.kata.spring.boot_security.demo.dao.UserDao;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import ru.kata.spring.boot_security.demo.model.User;
 
 import java.util.List;
 
-@Service
-public class UserService {
 
+public interface UserService extends UserDetailsService {
 
-    private final UserDao userDao;
+    void saveUser(User user);
+    void removeUser(long id);
+    void updateUser(User user);
+    List<User> getAllUsers();
+    User getUserById(long id);
 
-    @Autowired
-    public UserService(UserDao userDao, PasswordEncoder passwordEncoder) {
-        this.userDao = userDao;
-    }
-
-    public List<User> index() {
-        return userDao.findAll();
-    }
-
-    public User getUserById(long id) {
-        return userDao.findById(id).get();
-    }
-
-    public void addUser(User user) {
-        userDao.save(user);
-    }
-
-    public void removeUser(long id) {
-        userDao.deleteById(id);
-    }
-
-    public void updateUser(User user) {
-        userDao.save(user);
-    }
-
-    public User getUserByUsername(String username) {
-        return userDao.getUserByUsername(username);
-    }
+    @Override
+    UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
 }
