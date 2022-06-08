@@ -23,7 +23,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         this.successUserHandler = successUserHandler;
         this.passwordEncoder = passwordEncoder;
         this.userDetailsService = userDetailsService;
-
     }
 
     @Override
@@ -33,19 +32,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.formLogin()
-                .loginPage("/login")
-                .successHandler(successUserHandler)
-                .loginProcessingUrl("/login")
-                .usernameParameter("username")
-                .passwordParameter("password")
-                .permitAll();
+        http.formLogin().permitAll();
 
         http.logout()
                 .permitAll()
                 .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-                .logoutSuccessUrl("/login?logout")
-                .and().csrf().disable();
+                .logoutSuccessUrl("/login");
+
 
         http.authorizeRequests()
                 .antMatchers("/admin/**").hasRole( "ADMIN")
@@ -53,4 +46,5 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated()
                 .and().formLogin().successHandler(successUserHandler);
     }
+
 }
