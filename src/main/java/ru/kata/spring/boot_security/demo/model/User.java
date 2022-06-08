@@ -1,49 +1,49 @@
 package ru.kata.spring.boot_security.demo.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
-
 @Entity
-@Table(name = "users")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Table(name = "user")
 public class User implements UserDetails {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @Column(name = "name")
+    private long id;
+
     private String name;
-    @Column(name = "age")
-    private int age;
-    @Column(name = "username")
+
     private String email;
-    @Column(name = "password")
+
+    private int age;
+
     private String password;
 
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @JoinTable(name = "users_roles",
+                joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+                inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
+            Set<Role> roles;
 
-    @ManyToMany
-    @JoinTable(name = "usersroles",
-            joinColumns = @JoinColumn(name = "userid"),
-            inverseJoinColumns = @JoinColumn(name = "roleid"))
-    private Set<Role> roles = new HashSet<>();
+
+
+    public User() {}
+
+    public User(String name,  String email, int age, String password, Set<Role> roles) {
+        this.name = name;
+        this.email = email;
+        this.age = age;
+        this.password = password;
+        this.roles = roles;
+    }
 
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return getRoles().stream().map(r -> new SimpleGrantedAuthority(r.getName())).collect(Collectors.toList());
+        return roles;
     }
 
     @Override
@@ -76,16 +76,70 @@ public class User implements UserDetails {
         return true;
     }
 
-
-
-   /* public void addRole(Role role) { roles.add(role); }
-
-    public boolean containsRoleName(String roleName) {
-        return roles.stream().map(Role::getName).collect(Collectors.toList()).contains(roleName);
+    public void setId(long id) {
+        this.id = id;
     }
 
-    public Set<String> getNamesOfRoles() {
-        return getRoles().stream().map(Role::getName)
-                .map(name -> name.startsWith("ROLE_") ? name.substring(5) : name).collect(Collectors.toSet());
-    }*/
+    public long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
+    }
+
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public String stringRole() {
+        StringBuilder role = new StringBuilder();
+        for (Role r : roles) {
+            role.append(r.getName().replaceAll("ROLE_", "") + " ");
+        }
+        return role.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return id == user.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
 }
